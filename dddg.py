@@ -17,12 +17,14 @@ from lxml import etree
 from lxml.builder import E
 from progressbar import progressbar
 
+out = './example/'  # export folder for images and xml files
+
 STRUCTURE_DEPTH = 5
-MAXCNT_CHAPTER = 120
+MAXCNT_CHAPTER = 5
 MAXCNT_SECTION = 5
 MAXCNT_PARAGRAPH = 3
 MAXCNT_IMAGE = 6
-MAXCNT_IMAGELINK = 100000
+MAXCNT_IMAGELINK = 1000
 
 fake = Faker(locale="de_DE")
 
@@ -39,9 +41,7 @@ def gen_paragraph_text():
 
 def gen_paragraph(parent):
     for i in range(random.randint(1, MAXCNT_PARAGRAPH)):
-        paragraph = E.para(
-                E.title(gen_paragraph_text())
-        )
+        paragraph = E.para(gen_paragraph_text())
         parent.append(paragraph)
 
     return
@@ -98,7 +98,7 @@ for para in progressbar(random.sample(range(0, len(paragraphs)-1), MAXCNT_IMAGE)
     rgb_array = numpy.random.rand(200, 300, 3) * 255
     image = Image.fromarray(rgb_array.astype('uint8')).convert('RGB')
     filename = image_id + '.jpg'
-    image.save('misc/' + filename)
+    image.save(out + filename)
 
     figure = E.figure(
                 E.title(gen_heading_name()),
@@ -114,8 +114,7 @@ for para in progressbar(random.sample(range(0, len(paragraphs)-1), MAXCNT_IMAGE)
 
 
 # Adding Links to Images
-for para in progressbar([random.randint(0, len(paragraphs)-1) for _ in range(MAXCNT_IMAGELINK)],
-                        prefix="Linking Images: "):
+for para in progressbar([random.randint(0, len(paragraphs)-1) for _ in range(MAXCNT_IMAGELINK)], prefix="Linking Images: "):
     pos = random.randint(0, len(paragraphs[para].text.split())-1)  # choose a random word of para for inserting link
     img = random.randint(0, len(images)-1)  # choose a random image as destination
 
@@ -143,4 +142,4 @@ for para in progressbar([random.randint(0, len(paragraphs)-1) for _ in range(MAX
 
 # Save output
 tree = etree.ElementTree(document)
-tree.write('./misc/output.xml', pretty_print=True, xml_declaration=True,   encoding="utf-8")
+tree.write(out + 'output.xml', pretty_print=True, xml_declaration=True,   encoding="utf-8")
